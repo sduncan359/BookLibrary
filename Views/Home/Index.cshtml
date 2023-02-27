@@ -1,7 +1,90 @@
-﻿@{
+﻿@model BookLibrary.Models.BookModel
+@{
     ViewData["Title"] = "Home Page";
+
+    string userId = (string)TempData["userid"];
+    List<BookModel> books = TempData["books"] as List<BookModel>;
+    int numBooksCheckedOut = (int)TempData["numBooksCheckedOut"];
+    bool disableCheckout = (numBooksCheckedOut >= 5);
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>    
+    <h1 class="display-4">Checkout or return books to the library</h1>    
+
+    <div class="container" style="margin-top: 50px;">
+        @if (userId == null || userId.Length == 0)
+        {
+            <p>Please <a href="/Identity/Account/Login">login</a> to view the list of books.</p>
+        }
+        else
+        {
+            @if (books != null && books.Count > 0)
+            {
+                <p>You currently have @numBooksCheckedOut books checked out. You are limited to 5 books at a time.</p>
+                <form action="/Home/SearchBooks" method="post">
+                    <div class="form-group">
+                        <label for="searchTerm">Select search column:</label>
+                        <select name="searchColumn">
+                            <option value="Title" selected>Title</option>
+                            <option value="Author">Author</option>
+                            <option value="Year">Year</option>                        
+                        </select>
+                        <input type="text" name="searchTerm" placeholder="Search Text" />
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </form>
+
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Author</th>
+                            <th scope="col">User Rating</th>
+                            <th scope="col">Reviews</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Year</th>
+                            <th scope="col">Genre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var book in @books)
+                        {
+                            <tr>
+                                <td scope="row">@book.Name</td>
+                                <td>@book.Author</td>
+                                <td>@book.UserRating</td>
+                                <td>@book.Reviews</td>
+                                <td>@book.Price</td>
+                                <td>@book.Year</td>
+                                <td>@book.Genre</td>
+                                <td>
+                                    @if (book.CheckOutUserId != null && book.CheckOutUserId != userId)
+                                    {
+                                        <label class="label label-warning">Unavailable</label>
+                                    }
+                                    else
+                                    {
+                                        @if (book.CheckOutUserId != null && book.CheckOutUserId == userId)
+                                        {
+                                            <form asp-action="CheckInBook" asp-controller="Home" method="post">
+                                                <input type="hidden" asp-for="Id" value="@book.Id" />                                           
+                                                <button type="submit" class="btn btn-info">Check In</button>
+                                            </form>                                        
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="CheckOutBook" asp-controller="Home" method="post">
+                                                <input type="hidden" asp-for="Id" value="@book.Id" />                                           
+                                                <button type="submit" class="btn btn-success" disabled="@disableCheckout">Check Out</button>
+                                            </form>
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>            
+            }
+        }
+    </div>
 </div>
