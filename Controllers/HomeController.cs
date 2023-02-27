@@ -16,14 +16,21 @@ namespace BookLibrary.Controllers
             _logger = logger;
         }
 
+        private void SetTempData(string userId, ref List<BookModel> books, int pageNumber = 1)
+        {
+            TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
+            TempData["userid"] = userId;
+            TempData["books"] = books;
+            TempData["currentPage"] = pageNumber;
+            TempData["totalPages"] = DataMethods.GetTotalPages();
+        }
+
         public IActionResult Index()
         {            
             ClaimsIdentity claimsIdentity = User.Identity as ClaimsIdentity;
             string userId = DataMethods.GetUserID(claimsIdentity);
-            TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
-            TempData["userid"] = userId;
-            TempData["books"] = DataMethods.ShowAllBooks(1);
-            TempData["currentPage"] = 1;
+            List<BookModel> books = DataMethods.ShowAllBooks(1);
+            SetTempData(userId, ref books);
 
             return View();
         }
@@ -33,10 +40,8 @@ namespace BookLibrary.Controllers
         {
             ClaimsIdentity claimsIdentity = User.Identity as ClaimsIdentity;
             string userId = DataMethods.GetUserID(claimsIdentity);
-            TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
-            TempData["userid"] = userId;
-            TempData["books"] = DataMethods.ShowAllBooks(selectPage);
-            TempData["currentPage"] = selectPage;
+            List<BookModel> books = DataMethods.ShowAllBooks(selectPage);
+            SetTempData(userId, ref books, selectPage);
 
             return View("Index");
         }
@@ -45,11 +50,9 @@ namespace BookLibrary.Controllers
         public IActionResult SearchBooks(string searchTerm, string searchColumn)
         {
             ClaimsIdentity claimsIdentity = User.Identity as ClaimsIdentity;
-            string userId = DataMethods.GetUserID(claimsIdentity);
-            TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
-            TempData["userid"] = userId;
-            TempData["books"] = DataMethods.ShowBooksForSearch(searchTerm, searchColumn);
-            TempData["currentPage"] = 1;
+            string userId = DataMethods.GetUserID(claimsIdentity);           
+            List<BookModel> books = DataMethods.ShowBooksForSearch(searchTerm, searchColumn);
+            SetTempData(userId, ref books);
 
             return View("Index");
         }
@@ -58,11 +61,10 @@ namespace BookLibrary.Controllers
         public IActionResult CheckOutBook(BookModel book)
         {
             ClaimsIdentity claimsIdentity = User.Identity as ClaimsIdentity;
-            string userId = DataMethods.GetUserID(claimsIdentity);            
+            string userId = DataMethods.GetUserID(claimsIdentity);                       
             DataMethods.CheckOutBookForUser(book, userId);
-            TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
-            TempData["books"] = DataMethods.ShowAllBooks(1);
-            TempData["currentPage"] = 1;
+            List<BookModel> books = DataMethods.ShowAllBooks(1);
+            SetTempData(userId, ref books);
 
             return View("Index");
         }
@@ -73,9 +75,8 @@ namespace BookLibrary.Controllers
             ClaimsIdentity claimsIdentity = User.Identity as ClaimsIdentity;
             string userId = DataMethods.GetUserID(claimsIdentity);
             DataMethods.CheckInBookForUser(book, userId);
-            TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
-            TempData["books"] = DataMethods.ShowAllBooks(1);
-            TempData["currentPage"] = 1;
+            List<BookModel> books = DataMethods.ShowAllBooks(1);
+            SetTempData(userId, ref books);
 
             return View("Index");
         }

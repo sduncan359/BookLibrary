@@ -17,7 +17,7 @@ namespace BookLibrary.Data
 
             using (var db = new BookContext())
             {
-                books = db.Books.OrderBy(b => b.Name).Skip(pageNumber - 1).Take(c_PageSize).ToList();
+                books = db.Books.OrderBy(b => b.Name).Skip(c_PageSize * (pageNumber - 1)).Take(c_PageSize).ToList();
             }
 
             return books;
@@ -61,6 +61,23 @@ namespace BookLibrary.Data
             }
 
             return numBooks;
+        }
+
+        public static int GetTotalPages()
+        {
+            int totalPages = 0;
+
+            using (var db = new BookContext())
+            {
+                int numBooks = db.Books.Count();
+                totalPages = numBooks / c_PageSize;
+                if (numBooks % c_PageSize > 0)
+                {
+                    totalPages++;
+                }
+            }
+
+            return totalPages;
         }
 
         public static List<BookModel> ShowBooksForSearch(string searchTerm, string searchColumn, int pageNumber = 1)
