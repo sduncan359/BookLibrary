@@ -22,9 +22,23 @@ namespace BookLibrary.Controllers
             string userId = DataMethods.GetUserID(claimsIdentity);
             TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
             TempData["userid"] = userId;
-            TempData["books"] = DataMethods.ShowAllBooks(1);            
+            TempData["books"] = DataMethods.ShowAllBooks(1);
+            TempData["currentPage"] = 1;
 
             return View();
+        }
+
+        [HttpPost]
+        public IActionResult ChangePage(int selectPage)
+        {
+            ClaimsIdentity claimsIdentity = User.Identity as ClaimsIdentity;
+            string userId = DataMethods.GetUserID(claimsIdentity);
+            TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
+            TempData["userid"] = userId;
+            TempData["books"] = DataMethods.ShowAllBooks(selectPage);
+            TempData["currentPage"] = selectPage;
+
+            return View("Index");
         }
 
         [HttpPost]
@@ -34,7 +48,8 @@ namespace BookLibrary.Controllers
             string userId = DataMethods.GetUserID(claimsIdentity);
             TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
             TempData["userid"] = userId;
-            TempData["books"] = DataMethods.ShowBooksForSearch(searchTerm, searchColumn);            
+            TempData["books"] = DataMethods.ShowBooksForSearch(searchTerm, searchColumn);
+            TempData["currentPage"] = 1;
 
             return View("Index");
         }
@@ -47,6 +62,7 @@ namespace BookLibrary.Controllers
             DataMethods.CheckOutBookForUser(book, userId);
             TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
             TempData["books"] = DataMethods.ShowAllBooks(1);
+            TempData["currentPage"] = 1;
 
             return View("Index");
         }
@@ -59,6 +75,7 @@ namespace BookLibrary.Controllers
             DataMethods.CheckInBookForUser(book, userId);
             TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
             TempData["books"] = DataMethods.ShowAllBooks(1);
+            TempData["currentPage"] = 1;
 
             return View("Index");
         }

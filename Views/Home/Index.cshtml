@@ -6,6 +6,16 @@
     List<BookModel> books = TempData["books"] as List<BookModel>;
     int numBooksCheckedOut = (int)TempData["numBooksCheckedOut"];
     bool disableCheckout = (numBooksCheckedOut >= 5);
+    int currentPage = 1;
+    if (TempData["currentPage"] != null)
+    {
+        currentPage = (int)TempData["currentPage"];
+    }
+    int totalPages = 1;
+    if (TempData["totalPages"] != null)
+    {
+        totalPages = (int)TempData["totalPages"];
+    }
 }
 
 <div class="text-center">
@@ -20,6 +30,7 @@
         {
             @if (books != null && books.Count > 0)
             {
+                <p>You are viewing page @currentPage of @totalPages pages.</p>
                 <p>You currently have @numBooksCheckedOut books checked out. You are limited to 5 books at a time.</p>
                 <form action="/Home/SearchBooks" method="post">
                     <div class="form-group">
@@ -31,6 +42,26 @@
                         </select>
                         <input type="text" name="searchTerm" placeholder="Search Text" />
                         <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </form>
+
+                <form action="/Home/ChangePage" method="post">
+                    <div class="form-group">
+                        <label for="selectPage">Select page:</label>
+                        <select name="selectPage">
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                @if (i == currentPage)
+                                {
+                                    <option value="@i" selected>@i</option>
+                                }
+                                else
+                                {
+                                    <option value="@i" selected>@i</option>
+                                }
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-primary">Select</button>
                     </div>
                 </form>
 
