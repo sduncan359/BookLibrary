@@ -16,13 +16,16 @@ namespace BookLibrary.Controllers
             _logger = logger;
         }
 
-        private void SetTempData(string userId, ref List<BookModel> books, int pageNumber = 1)
+        private void SetTempData(string userId, ref List<BookModel> books, int pageNumber = 1,
+            string searchColumn = "", string searchTerm = "")
         {
             TempData["numBooksCheckedOut"] = DataMethods.GetNumberOfBooksCheckedOut(userId);
             TempData["userid"] = userId;
             TempData["books"] = books;
             TempData["currentPage"] = pageNumber;
-            TempData["totalPages"] = DataMethods.GetTotalPages();
+            TempData["totalPages"] = DataMethods.GetTotalPages(searchColumn, searchTerm);
+            TempData["searchColumn"] = searchColumn;
+            TempData["searchTerm"] = searchTerm;
         }
 
         public IActionResult Index()
@@ -36,12 +39,20 @@ namespace BookLibrary.Controllers
         }
 
         [HttpPost]
-        public IActionResult ChangePage(int selectPage)
+        public IActionResult ChangePage(int selectPage, string searchColumn, string searchTerm)
         {
             ClaimsIdentity claimsIdentity = User.Identity as ClaimsIdentity;
             string userId = DataMethods.GetUserID(claimsIdentity);
-            List<BookModel> books = DataMethods.ShowAllBooks(selectPage);
-            SetTempData(userId, ref books, selectPage);
+            List<BookModel> books = null;
+            if (searchColumn.Length > 0 && searchTerm.Trim().Length > 0)
+            {
+                books = DataMethods.ShowBooksForSearch(searchColumn, searchTerm, selectPage);
+            }
+            else
+            {
+                books = DataMethods.ShowAllBooks(selectPage);
+            }
+            SetTempData(userId, ref books, selectPage, searchColumn, searchTerm);
 
             return View("Index");
         }
@@ -51,8 +62,8 @@ namespace BookLibrary.Controllers
         {
             ClaimsIdentity claimsIdentity = User.Identity as ClaimsIdentity;
             string userId = DataMethods.GetUserID(claimsIdentity);           
-            List<BookModel> books = DataMethods.ShowBooksForSearch(searchTerm, searchColumn);
-            SetTempData(userId, ref books);
+            List<BookModel> books = DataMethods.ShowBooksForSearch(searchColumn, searchTerm);
+            SetTempData(userId, ref books, 1, searchColumn, searchTerm);
 
             return View("Index");
         }

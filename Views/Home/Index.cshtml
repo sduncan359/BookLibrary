@@ -6,16 +6,10 @@
     List<BookModel> books = TempData["books"] as List<BookModel>;
     int numBooksCheckedOut = (int)TempData["numBooksCheckedOut"];
     bool disableCheckout = (numBooksCheckedOut >= 5);
-    int currentPage = 1;
-    if (TempData["currentPage"] != null)
-    {
-        currentPage = (int)TempData["currentPage"];
-    }
-    int totalPages = 1;
-    if (TempData["totalPages"] != null)
-    {
-        totalPages = (int)TempData["totalPages"];
-    }
+    int currentPage = (TempData["currentPage"] == null) ? 1 : (int)TempData["currentPage"];
+    int totalPages = (TempData["totalPages"] == null) ? 1 : (int)TempData["totalPages"];       
+    string searchColumn = (TempData["searchColumn"] == null) ? "" : (string)TempData["searchColumn"];  
+    string searchTerm = (TempData["searchTerm"] == null) ? "" : (string)TempData["searchTerm"];
 }
 
 <div class="text-center">
@@ -35,12 +29,12 @@
                 <form action="/Home/SearchBooks" method="post">
                     <div class="form-group">
                         <label for="searchTerm">Select search column:</label>
-                        <select name="searchColumn">
-                            <option value="Title" selected>Title</option>
+                        <select name="searchColumn" value="@searchColumn">
+                            <option value="Title">Title</option>
                             <option value="Author">Author</option>
                             <option value="Year">Year</option>                        
                         </select>
-                        <input type="text" name="searchTerm" placeholder="Search Text" />
+                        <input type="text" name="searchTerm" placeholder="Search Text" value="@searchTerm"/>
                         <button type="submit" class="btn btn-primary">Search</button>
                     </div>
                 </form>
@@ -61,6 +55,8 @@
                                 }
                             }
                         </select>
+                        <input type="hidden" name="searchColumn" value="@searchColumn" />
+                        <input type="hidden" name="searchTerm" value="@searchTerm" />
                         <button type="submit" class="btn btn-primary">Select</button>
                     </div>
                 </form>

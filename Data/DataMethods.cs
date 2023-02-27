@@ -63,13 +63,36 @@ namespace BookLibrary.Data
             return numBooks;
         }
 
-        public static int GetTotalPages()
+        public static int GetTotalPages(string searchColumn, string searchTerm)
         {
             int totalPages = 0;
 
             using (var db = new BookContext())
             {
-                int numBooks = db.Books.Count();
+                int numBooks = 0;
+                if (searchColumn.Length > 0 && searchTerm.Trim().Length > 0)
+                {
+                    switch (searchColumn)
+                    {
+                        case "Author":
+                            numBooks = db.Books.Where(b => b.Author.ToLower().Contains(searchTerm.Trim().ToLower())).Count();
+                            break;
+                        case "Year":
+                            int result = -1;
+                            if (Int32.TryParse(searchTerm, out result))
+                            {
+                                numBooks = db.Books.Where(b => b.Year == result).Count();
+                            }
+                            break;
+                        default: // Title
+                            numBooks = db.Books.Where(b => b.Name.ToLower().Contains(searchTerm.Trim().ToLower())).Count();
+                            break;
+                    }                    
+                }
+                else
+                {
+                    numBooks = db.Books.Count();
+                }
                 totalPages = numBooks / c_PageSize;
                 if (numBooks % c_PageSize > 0)
                 {
@@ -80,7 +103,7 @@ namespace BookLibrary.Data
             return totalPages;
         }
 
-        public static List<BookModel> ShowBooksForSearch(string searchTerm, string searchColumn, int pageNumber = 1)
+        public static List<BookModel> ShowBooksForSearch(string searchColumn, string searchTerm, int pageNumber = 1)
         {
             List<BookModel> books = new List<BookModel>();
 
@@ -91,13 +114,13 @@ namespace BookLibrary.Data
                     switch (searchColumn)
                     {
                         case "Author":
-                            books = db.Books.Where(b => b.Author.ToLower().Contains(searchTerm.Trim().ToLower())).OrderBy(b => b.Name).Skip(pageNumber - 1).Take(c_PageSize).ToList();
+                            books = db.Books.Where(b => b.Author.ToLower().Contains(searchTerm.Trim().ToLower())).OrderBy(b => b.Author).Skip(pageNumber - 1).Take(c_PageSize).ToList();
                             break;
                         case "Year":
                             int result = -1;
                             if (Int32.TryParse(searchTerm, out result))
                             {
-                                books = db.Books.Where(b => b.Year == result).OrderBy(b => b.Name).Skip(pageNumber - 1).Take(c_PageSize).ToList();
+                                books = db.Books.Where(b => b.Year == result).OrderBy(b => b.Year).Skip(pageNumber - 1).Take(c_PageSize).ToList();
                             }
                             break;
                         default: // Title
